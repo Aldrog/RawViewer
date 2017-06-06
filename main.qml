@@ -16,6 +16,7 @@ Window {
         height: parent.height
 
         fillMode: Image.PreserveAspectFit
+        smooth: false
         source: "image://raw/image"
     }
 
