@@ -25,18 +25,18 @@ Window {
 
         anchors.fill: parent
         onWheel: {
-            image.scale += wheel.angleDelta.y / 1000
+            var wheelX = (wheel.x - (image.x + image.width / 2))
+            var wheelY = (wheel.y - (image.y + image.width / 2))
+            var delta = wheel.angleDelta.y / 1000
+            image.scale += delta
             if(image.scale < 1)
                 image.scale = 1
-            /* TODO: Correct math for moving towards mouse position
-            if(wheel.angleDelta.y > 0) {
-                image.x += 1/image.scale * (width  / 2 - wheel.x)
-                image.y += 1/image.scale * (height / 2 - wheel.y)
-            } else {
-                image.x -= 1/image.scale * (width  / 2 - wheel.x)
-                image.y -= 1/image.scale * (height / 2 - wheel.y)
+            else {
+                var newWheelX = wheelX * (image.scale / (image.scale - delta))
+                var newWheelY = wheelY * (image.scale / (image.scale - delta))
+                image.x += wheelX - newWheelX
+                image.y += wheelY - newWheelY
             }
-            */
         }
 
         onPressed: {
