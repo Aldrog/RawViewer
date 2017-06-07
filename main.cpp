@@ -26,9 +26,9 @@ int main(int argc, char *argv[])
     }
 
     QQmlApplicationEngine engine;
-    RawImageProvider provider;
-    provider.loadImage(args[0], pgm);
-    engine.addImageProvider("raw", &provider);
+    RawImageProvider *provider = new RawImageProvider();
+    provider->loadImage(args[0], pgm);
+    engine.addImageProvider("raw", provider);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();
