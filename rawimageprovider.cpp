@@ -15,7 +15,7 @@ QImage RawImageProvider::requestImage(const QString &id, QSize *size, const QSiz
     return img;
 }
 
-void RawImageProvider::loadImage(const QString &path)
+void RawImageProvider::loadImage(const QString &path, bool savePgm)
 {
     const int image_width = 2448;
     const int image_height = 2048;
@@ -43,35 +43,37 @@ void RawImageProvider::loadImage(const QString &path)
     /*
      * Write PGM
      */
-    int fileNameLength = path.lastIndexOf(".");
-    if(fileNameLength <= 0)
-        fileNameLength = path.length();
-    std::string outPath = path.left(fileNameLength + 1).toStdString() + "pgm";
-    std::ofstream outStream(outPath, std::ios::binary);
-    if (!outStream.is_open()) {
-        qDebug() << "Error opening output file";
-        free(image_buffer);
-        return;
-    }
-    outStream << "P5\n";
-    outStream << image_width  << "\n";
-    outStream << image_height << "\n";
-    outStream << 4095 << "\n";
-    //outStream.write((char*)image_buffer, image_width * image_height * 2);
-    /*
-     * First byte is most significant
-     * which conflicts with little-endianness so write byte-by-byte
-     */
-    uint16_t *iter = image_buffer;
-    for (int i = 0; i < image_height; ++i) {
-        for (int j = 0; j < image_width; ++j) {
-            char c = *iter >> 8;
-            outStream << c;
-            c = *iter >> 0;
-            outStream << c;
-            iter++;
+    if(savePgm) {
+        int fileNameLength = path.lastIndexOf(".");
+        if(fileNameLength <= 0)
+            fileNameLength = path.length();
+        std::string outPath = path.left(fileNameLength + 1).toStdString() + "pgm";
+        std::ofstream outStream(outPath, std::ios::binary);
+        if (!outStream.is_open()) {
+            qDebug() << "Error opening output file";
+            free(image_buffer);
+            return;
         }
+        outStream << "P5\n";
+        outStream << image_width  << "\n";
+        outStream << image_height << "\n";
+        outStream << 4095 << "\n";
+        //outStream.write((char*)image_buffer, image_width * image_height * 2);
+        /*
+         * First byte is most significant
+         * which conflicts with little-endianness so write byte-by-byte
+         */
+        uint16_t *iter = image_buffer;
+        for (int i = 0; i < image_height; ++i) {
+            for (int j = 0; j < image_width; ++j) {
+                char c = *iter >> 8;
+                outStream << c;
+                c = *iter >> 0;
+                outStream << c;
+                iter++;
+            }
+        }
+        outStream.close();
     }
-    outStream.close();
     free(image_buffer);
 }
