@@ -3,6 +3,9 @@
 #include <iostream>
 #include <stdio.h>
 #include <fstream>
+#include <QRegularExpression>
+#include <QDir>
+#include <QPainter>
 #include <QDebug>
 
 RawImageProvider::RawImageProvider() : QQuickImageProvider(QQuickImageProvider::Image)
@@ -17,8 +20,6 @@ QImage RawImageProvider::requestImage(const QString &id, QSize *size, const QSiz
 
 void RawImageProvider::loadImage(const QUrl &url, bool savePgm)
 {
-    const int image_width = 2448;
-    const int image_height = 2048;
     std::ifstream inStream(url.path().toStdString(), std::ios::binary);
     if (!inStream.is_open()) {
         qDebug() << "Error opening file";
@@ -76,4 +77,37 @@ void RawImageProvider::loadImage(const QUrl &url, bool savePgm)
         outStream.close();
     }
     free(image_buffer);
+}
+
+void RawImageProvider::loadStation(const QUrl &url, bool savePgm)
+{
+    QRegularExpression idRegex(QStringLiteral("c\\d_im(\\d+)_"));
+    const auto &idMatch = idRegex.match(url.fileName());
+    if(!idMatch.hasMatch())
+        return;
+    int id = idMatch.captured(1).toInt();
+    QString loc = idMatch.captured(1);
+    QDir imagesLoc(url.path());
+    imagesLoc.cdUp();
+    imagesLoc.cdUp();
+    imagesLoc.cdUp();
+    const QStringList &camDirList = imagesLoc.entryList({ QStringLiteral("c?") }, QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+    QImage overview(image_width * 3, image_height * (camDirList.size() / 3), QImage::Format_Grayscale8);
+    QPainter painter(&overview);
+    int x = 0, y = 0;
+    for (QString camDirName : camDirList)
+    {
+        QDir currentDir = imagesLoc;
+        currentDir.cd(camDirName);
+        currentDir.cd(QString::number(id / 100 * 100));
+        QFileInfo fileInfo = currentDir.entryInfoList({ QStringLiteral("c?_im%1_*.raw").arg(loc) })[0];
+        loadImage(QUrl(fileInfo.filePath()), savePgm);
+        painter.drawImage(x, y, img);
+        x += image_width;
+        if(x >= overview.width()) {
+            x = 0;
+            y += image_height;
+        }
+    }
+    img = overview;
 }

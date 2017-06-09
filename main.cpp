@@ -47,7 +47,10 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     RawImageProvider *provider = new RawImageProvider();
     QUrl imageUrl = QUrl::fromUserInput(args[0]);
-    provider->loadImage(imageUrl, pgm);
+    if(settings->viewMode == ViewSettings::Station)
+        provider->loadStation(imageUrl, pgm);
+    else
+        provider->loadImage(imageUrl, pgm);
     engine.addImageProvider("raw", provider);
     engine.rootContext()->setContextProperty("fileName", imageUrl.fileName());
     qmlRegisterType<ViewSettings>("cvs.rawviewer", 1, 0, "ViewSettings");

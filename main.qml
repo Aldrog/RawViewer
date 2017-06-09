@@ -6,7 +6,7 @@ import QtQuick.Controls.Material 2.1
 import cvs.rawviewer 1.0
 
 ApplicationWindow {
-    id: window
+    id: appWindow
 
     function isDarkColor(color) {
         color = Qt.darker(color, 1)
@@ -21,14 +21,15 @@ ApplicationWindow {
     }
 
     visible: true
-    width: 1224
-    height: 1024
+    width: (settings.viewMode === ViewSettings.Station ? 918 : 1224)
+    height: (settings.viewMode === ViewSettings.Station ? 512 : 1024) + appBar.height
     title: qsTr("Hello LPS")
 
     Material.primary: Material.Blue
     Material.accent: Material.Red
 
     header: ToolBar {
+        id: appBar
         Material.background: Material.primaryColor
         Material.theme: lightDark(Material.background, Material.Light, Material.Dark)
 
@@ -61,8 +62,6 @@ ApplicationWindow {
             }
         }
     }
-
-    Component.onCompleted: console.log(settings.viewMode === ViewSettings.Station)
 
     Image {
         id: image
