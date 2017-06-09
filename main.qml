@@ -3,6 +3,7 @@ import QtQuick.Window 2.2
 import QtQuick.Layouts 1.0
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Material 2.1
+import cvs.rawviewer 1.0
 
 ApplicationWindow {
     id: window
@@ -61,6 +62,7 @@ ApplicationWindow {
         }
     }
 
+    Component.onCompleted: console.log(settings.viewMode === ViewSettings.Station)
 
     Image {
         id: image

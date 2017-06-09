@@ -4,7 +4,8 @@ QT += qml quick quickcontrols2
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    rawimageprovider.cpp
+    rawimageprovider.cpp \
+    viewsettings.cpp
 
 RESOURCES += qml.qrc
 
@@ -31,4 +32,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    rawimageprovider.h
+    rawimageprovider.h \
+    viewsettings.h

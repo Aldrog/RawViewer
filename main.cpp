@@ -7,6 +7,7 @@
 #include <QTranslator>
 #include <QLibraryInfo>
 #include "rawimageprovider.h"
+#include "viewsettings.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,11 +30,15 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     QCommandLineOption savePgmOption(QStringLiteral("pgm"), app.translate("main", "Save loaded image into PGM."));
     parser.addOption(savePgmOption);
+    QCommandLineOption stationModeOption(QStringLiteral("station"), app.translate("main", "Split view of all cameras of a station (assumes LPS directory structure)."));
+    parser.addOption(stationModeOption);
     parser.addPositionalArgument(QStringLiteral("FILE"), app.translate("main", "Path to a raw image file."));
 
     parser.process(app);
     QStringList args = parser.positionalArguments();
     bool pgm = parser.isSet(savePgmOption);
+    ViewSettings *settings = new ViewSettings();
+    settings->viewMode = parser.isSet(stationModeOption) ? ViewSettings::Station : ViewSettings::Single;
     if(args.length() != 1) {
         parser.showHelp();
         return 0;
@@ -45,6 +50,8 @@ int main(int argc, char *argv[])
     provider->loadImage(imageUrl, pgm);
     engine.addImageProvider("raw", provider);
     engine.rootContext()->setContextProperty("fileName", imageUrl.fileName());
+    qmlRegisterType<ViewSettings>("cvs.rawviewer", 1, 0, "ViewSettings");
+    engine.rootContext()->setContextProperty("settings", settings);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();
