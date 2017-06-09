@@ -94,7 +94,8 @@ void RawImageProvider::loadStation(const QUrl &url, bool savePgm)
     const QStringList &camDirList = imagesLoc.entryList({ QStringLiteral("c?") }, QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
     QImage overview(image_width * 3, image_height * (camDirList.size() / 3), QImage::Format_Grayscale8);
     QPainter painter(&overview);
-    int x = 0, y = 0;
+    int x = overview.width() - image_width;
+    int y = overview.height() - image_height;
     for (QString camDirName : camDirList)
     {
         QDir currentDir = imagesLoc;
@@ -103,10 +104,10 @@ void RawImageProvider::loadStation(const QUrl &url, bool savePgm)
         QFileInfo fileInfo = currentDir.entryInfoList({ QStringLiteral("c?_im%1_*.raw").arg(loc) })[0];
         loadImage(QUrl(fileInfo.filePath()), savePgm);
         painter.drawImage(x, y, img);
-        x += image_width;
-        if(x >= overview.width()) {
-            x = 0;
-            y += image_height;
+        x -= image_width;
+        if(x < 0) {
+            x = overview.width() - image_width;
+            y -= image_height;
         }
     }
     img = overview;
