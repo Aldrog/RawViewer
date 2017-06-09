@@ -3,11 +3,25 @@
 #include <QQmlContext>
 #include <QImage>
 #include <QCommandLineParser>
+#include <QQuickStyle>
+#include <QTranslator>
+#include <QLibraryInfo>
 #include "rawimageprovider.h"
 
 int main(int argc, char *argv[])
 {
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QQuickStyle::setStyle(QStringLiteral("Material"));
     QGuiApplication app(argc, argv);
+
+    // Load Translations
+    QTranslator qtTranslator;
+    qtTranslator.load("qt_" + QLocale::system().name(),
+                      QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    app.installTranslator(&qtTranslator);
+    QTranslator translator;
+    if(translator.load(":/translations/" + QLocale::system().name()))
+        app.installTranslator(&translator);
 
     // Parse command line options
     QCommandLineParser parser;
@@ -27,8 +41,10 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     RawImageProvider *provider = new RawImageProvider();
-    provider->loadImage(args[0], pgm);
+    QUrl imageUrl = QUrl::fromUserInput(args[0]);
+    provider->loadImage(imageUrl, pgm);
     engine.addImageProvider("raw", provider);
+    engine.rootContext()->setContextProperty("fileName", imageUrl.fileName());
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();

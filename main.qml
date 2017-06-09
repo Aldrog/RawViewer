@@ -1,11 +1,66 @@
 import QtQuick 2.6
 import QtQuick.Window 2.2
+import QtQuick.Layouts 1.0
+import QtQuick.Controls 2.1
+import QtQuick.Controls.Material 2.1
 
-Window {
+ApplicationWindow {
+    id: window
+
+    function isDarkColor(color) {
+        color = Qt.darker(color, 1)
+
+        var a = 1 - (0.299 * color.r + 0.587 * color.g + 0.114 * color.b)
+
+        return color.a > 0 && a >= 0.3
+    }
+
+    function lightDark(background, lightColor, darkColor) {
+        return isDarkColor(background) ? darkColor : lightColor
+    }
+
     visible: true
     width: 1224
     height: 1024
     title: qsTr("Hello LPS")
+
+    Material.primary: Material.Blue
+    Material.accent: Material.Red
+
+    header: ToolBar {
+        Material.background: Material.primaryColor
+        Material.theme: lightDark(Material.background, Material.Light, Material.Dark)
+
+        RowLayout {
+            anchors {
+                fill: parent
+                rightMargin: 16
+                leftMargin: 16
+            }
+
+            Label {
+                text: fileName
+                elide: Label.ElideRight
+                font.pixelSize: 20
+                font.weight: Font.Medium
+                color: Material.primaryTextColor
+                horizontalAlignment: Qt.AlignLeft
+                verticalAlignment: Qt.AlignVCenter
+                Layout.alignment: Qt.AlignLeft
+            }
+
+            ToolButton {
+                text: qsTr("›‹")
+                Layout.alignment: Qt.AlignRight
+                onClicked: {
+                    image.scale = 1
+                    image.x = 0
+                    image.y = 0
+                }
+            }
+        }
+    }
+
 
     Image {
         id: image

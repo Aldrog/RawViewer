@@ -15,11 +15,11 @@ QImage RawImageProvider::requestImage(const QString &id, QSize *size, const QSiz
     return img;
 }
 
-void RawImageProvider::loadImage(const QString &path, bool savePgm)
+void RawImageProvider::loadImage(const QUrl &url, bool savePgm)
 {
     const int image_width = 2448;
     const int image_height = 2048;
-    std::ifstream inStream(path.toStdString(), std::ios::binary);
+    std::ifstream inStream(url.path().toStdString(), std::ios::binary);
     if (!inStream.is_open()) {
         qDebug() << "Error opening file";
         return;
@@ -44,10 +44,10 @@ void RawImageProvider::loadImage(const QString &path, bool savePgm)
      * Write PGM
      */
     if(savePgm) {
-        int fileNameLength = path.lastIndexOf(".");
+        int fileNameLength = url.path().lastIndexOf(".");
         if(fileNameLength <= 0)
-            fileNameLength = path.length();
-        std::string outPath = path.left(fileNameLength + 1).toStdString() + "pgm";
+            fileNameLength = url.path().length();
+        std::string outPath = url.path().left(fileNameLength + 1).toStdString() + "pgm";
         std::ofstream outStream(outPath, std::ios::binary);
         if (!outStream.is_open()) {
             qDebug() << "Error opening output file";

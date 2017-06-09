@@ -8,7 +8,7 @@ class RawImageProvider : public QQuickImageProvider
 public:
     RawImageProvider();
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
-    void loadImage(const QString &path, bool savePgm);
+    void loadImage(const QUrl &url, bool savePgm);
 private:
     QImage img;
 };
