@@ -108,4 +108,32 @@ ApplicationWindow {
             image.y += deltaY
         }
     }
+
+    Shortcut {
+        sequence: "F10"
+        onActivated: {
+            if(appState.state === "fullscreen")
+                appState.state = "default"
+            else
+                appState.state = "fullscreen"
+        }
+    }
+
+    StateGroup {
+        id: appState
+        state: "default"
+        states: [
+            State {
+                name: "fullscreen"
+                PropertyChanges {
+                    target: appWindow
+                    visibility: Window.FullScreen
+                }
+                PropertyChanges {
+                    target: appBar
+                    visible: false
+                }
+            }
+        ]
+    }
 }
