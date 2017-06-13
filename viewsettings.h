@@ -14,7 +14,7 @@ public:
 
     explicit ViewSettings(QObject *parent = nullptr);
 
-    Q_PROPERTY(ViewMode viewMode MEMBER viewMode)
+    Q_PROPERTY(ViewMode viewMode MEMBER viewMode CONSTANT)
 
 signals:
 
