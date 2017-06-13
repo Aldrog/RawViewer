@@ -86,8 +86,7 @@ void RawImageProvider::loadStation(const QUrl &url, bool savePgm)
         return;
     int id = idMatch.captured(1).toInt();
     QString loc = idMatch.captured(1);
-    QDir imagesLoc(url.path());
-    imagesLoc.cdUp();
+    QDir imagesLoc = QFileInfo(url.path()).absoluteDir();
     imagesLoc.cdUp();
     imagesLoc.cdUp();
     const QStringList &camDirList = imagesLoc.entryList({ QStringLiteral("c?") }, QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
