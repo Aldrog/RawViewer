@@ -1,8 +1,5 @@
 #include "rawimageprovider.h"
 
-#include <iostream>
-#include <stdio.h>
-#include <fstream>
 #include <QRegularExpression>
 #include <QDir>
 #include <QPainter>
@@ -20,18 +17,19 @@ QImage RawImageProvider::requestImage(const QString &id, QSize *size, const QSiz
 
 void RawImageProvider::loadImage(const QUrl &url, bool savePgm)
 {
-    std::ifstream inStream(url.path().toStdString(), std::ios::binary);
-    if (!inStream.is_open()) {
+    QFile inFile(url.path());
+    if (!inFile.open(QIODevice::ReadOnly)) {
         qDebug() << "Error opening file";
         return;
     }
+    QDataStream inStream(&inFile);
     uint16_t *image_buffer = (uint16_t *)malloc(image_width * image_height * 2);
     img = QImage(image_width, image_height, QImage::Format_Grayscale8);
     for (int i = 0; i < image_height; ++i) {
         char *imgLine = (char *)img.scanLine(i);
         for (int j = 0; j < image_width; j += 2) {
             char tmpBuf[3];
-            inStream.read(tmpBuf, 3);
+            inStream.readRawData(tmpBuf, 3);
             image_buffer[i * image_width + j] = ((0x0FF0 & uint16_t(tmpBuf[0]) << 4) |
                                                  (0x000F & (uint16_t(uint8_t(tmpBuf[1] << 4)) >> 4)));
             image_buffer[i * image_width + j + 1] = ((0x0FF0 & uint16_t(tmpBuf[2] << 4)) |
@@ -40,7 +38,7 @@ void RawImageProvider::loadImage(const QUrl &url, bool savePgm)
             imgLine[j + 1] = image_buffer[i * image_width + j + 1] >> 4;
         }
     }
-    inStream.close();
+    inFile.close();
     /*
      * Write PGM
      */
@@ -48,13 +46,14 @@ void RawImageProvider::loadImage(const QUrl &url, bool savePgm)
         int fileNameLength = url.path().lastIndexOf(".");
         if(fileNameLength <= 0)
             fileNameLength = url.path().length();
-        std::string outPath = url.path().left(fileNameLength + 1).toStdString() + "pgm";
-        std::ofstream outStream(outPath, std::ios::binary);
-        if (!outStream.is_open()) {
+        QString outPath = url.path().left(fileNameLength + 1) + "pgm";
+        QFile outFile(outPath);
+        if (!outFile.open(QIODevice::ReadOnly)) {
             qDebug() << "Error opening output file";
             free(image_buffer);
             return;
         }
+        QDataStream outStream(&outFile);
         outStream << "P5\n";
         outStream << image_width  << "\n";
         outStream << image_height << "\n";
@@ -74,7 +73,7 @@ void RawImageProvider::loadImage(const QUrl &url, bool savePgm)
                 iter++;
             }
         }
-        outStream.close();
+        outFile.close();
     }
     free(image_buffer);
 }
