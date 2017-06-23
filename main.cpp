@@ -6,6 +6,7 @@
 #include <QQuickStyle>
 #include <QTranslator>
 #include <QLibraryInfo>
+#include <QDebug>
 #include "rawimageprovider.h"
 #include "viewsettings.h"
 
@@ -46,7 +47,8 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     RawImageProvider *provider = new RawImageProvider();
-    QUrl imageUrl = QUrl::fromUserInput(args[0]);
+    QUrl imageUrl = QUrl::fromLocalFile(args[0]);
+    qDebug() << imageUrl << parser.positionalArguments();
     if(settings->viewMode == ViewSettings::Station)
         provider->loadStation(imageUrl, pgm);
     else

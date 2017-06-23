@@ -48,16 +48,18 @@ void RawImageProvider::loadImage(const QUrl &url, bool savePgm)
             fileNameLength = url.path().length();
         QString outPath = url.path().left(fileNameLength + 1) + "pgm";
         QFile outFile(outPath);
-        if (!outFile.open(QIODevice::ReadOnly)) {
-            qDebug() << "Error opening output file";
+        if (!outFile.open(QIODevice::WriteOnly)) {
+            qDebug() << "Error opening output file" << outPath << "for reason" << outFile.errorString();
             free(image_buffer);
             return;
         }
         QDataStream outStream(&outFile);
-        outStream << "P5\n";
-        outStream << image_width  << "\n";
-        outStream << image_height << "\n";
-        outStream << 4095 << "\n";
+        outStream.writeRawData("P5\n", 3);
+        outStream.writeRawData(QString::number(image_width).toStdString().c_str(), QString::number(image_width).length());
+        outStream.writeRawData(" ", 1);
+        outStream.writeRawData(QString::number(image_height).toStdString().c_str(), QString::number(image_height).length());
+        outStream.writeRawData("\n", 1);
+        outStream.writeRawData("4095\n", 5);
         //outStream.write((char*)image_buffer, image_width * image_height * 2);
         /*
          * First byte is most significant
@@ -67,9 +69,9 @@ void RawImageProvider::loadImage(const QUrl &url, bool savePgm)
         for (int i = 0; i < image_height; ++i) {
             for (int j = 0; j < image_width; ++j) {
                 char c = *iter >> 8;
-                outStream << c;
+                outStream.writeRawData(&c, 1);
                 c = *iter >> 0;
-                outStream << c;
+                outStream.writeRawData(&c, 1);
                 iter++;
             }
         }
